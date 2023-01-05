@@ -1,0 +1,14 @@
+<VirtualHost *:80>
+    ServerName icingaweb2.com
+    ServerAlias icingaweb2.com
+    ServerAdmin webmaster@icingaweb2.com
+    DocumentRoot /var/www/icingaweb2
+
+    <Directory /var/www/icingaweb2>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/icingaweb2.com-error.log
+    CustomLog ${APACHE_LOG_DIR}/icingaweb2.com-access.log combined
+</VirtualHost>

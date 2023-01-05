@@ -1,0 +1,9 @@
+<Component Thruk::Backend>
+      <peer>
+          name    = server
+          type    = livestatus
+          <options>
+              peer    ={{ nagios_private_ip }}:6557
+          </options>
+      </peer>
+  </Component>

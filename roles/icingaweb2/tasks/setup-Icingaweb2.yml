@@ -1,0 +1,86 @@
+---
+
+- name: Create /etc/apache2/sites-available/icingaweb2.com.conf
+  template:
+    src: "templates/icingaweb2.com.j2"
+    dest: "/etc/apache2/sites-available/{{ domain }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create /etc/icingaweb2/resources.ini
+  template:
+    src: "templates/resources.ini.j2"
+    dest: "/etc/icingaweb2/resources.ini"
+    owner: root
+    group: icingaweb2
+    mode: '0644'
+
+- name: Create /etc/icingaweb2/config.ini
+  template:
+    src: "templates/config.ini.j2"
+    dest: "/etc/icingaweb2/config.ini"
+    owner: root
+    group: icingaweb2
+    mode: '0644'
+
+- name: Create /etc/icingaweb2/authentication.ini
+  template:
+    src: "templates/authentication.ini.j2"
+    dest: "/etc/icingaweb2/authentication.ini"
+    owner: root
+    group: icingaweb2
+    mode: '0644'
+
+- name: Create /etc/icingaweb2/roles.ini
+  template:
+    src: "templates/roles.ini.j2"
+    dest: "/etc/icingaweb2/roles.ini"
+    owner: root
+    group: icingaweb2
+    mode: '0644'
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: /etc/icingaweb2/modules/monitoring
+    state: directory
+    mode: '2770'
+    owner: root
+    group: icingaweb2
+
+- name: Create /etc/icingaweb2/modules/monitoring/config.ini
+  template:
+    src: "templates/config_monitoring.ini.j2"
+    dest: "/etc/icingaweb2/modules/monitoring/config.ini"
+    owner: root
+    group: icingaweb2
+    mode: '0644'
+
+- name: Create /etc/icingaweb2/modules/monitoring/backends.ini
+  template:
+    src: "templates/backends.ini.j2"
+    dest: "/etc/icingaweb2/modules/monitoring/backends.ini"
+    owner: root
+    group: icingaweb2
+    mode: '0644'
+
+- name: Create /etc/icingaweb2/modules/monitoring/commandtransports.ini
+  template:
+    src: "templates/commandtransports.ini.j2"
+    dest: "/etc/icingaweb2/modules/monitoring/commandtransports.ini"
+    owner: root
+    group: icingaweb2
+    mode: '0644'
+
+- name: adding existing www-data to group icingaweb2 
+  user:
+    name: 'www-data'
+    groups: icingaweb2
+    append: yes
+
+- name: Enable Icingaweb2 monitoring modules
+  command: icingacli module enable monitoring
+
+- name: Start icinga2
+  service: name=icinga2 state=restarted
+  when: icingaweb2_install_packages | bool

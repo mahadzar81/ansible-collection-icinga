@@ -1,0 +1,76 @@
+---
+
+- name: Get MySQL version.
+  command: 'mysql --version'
+  register: mysql_cli_version
+  changed_when: false
+  check_mode: false
+  
+- name: Get list of hosts for the root user.
+  command: mysql -NBe
+    "SELECT Host
+    FROM mysql.user
+    WHERE User = '{{ mysql_root_username }}'
+    ORDER BY (Host='localhost') ASC"
+  register: mysql_root_hosts
+  changed_when: false
+  check_mode: false
+  when: icingaweb2_install_packages | bool
+
+# Note: We do not use mysql_user for this operation, as it doesn't always update
+# the root password correctly. See: https://goo.gl/MSOejW
+# Set root password for MySQL >= 5.7.x.
+- name: Update MySQL root password for localhost root account (5.7.x).
+  shell: >
+    mysql -u root -NBe
+    'ALTER USER "{{ mysql_root_username }}"@"{{ item }}"
+    IDENTIFIED WITH mysql_native_password BY "{{ mysql_root_password }}"; FLUSH PRIVILEGES;'
+  with_items: "{{ mysql_root_hosts.stdout_lines|default([]) }}"
+  when: >
+    icingaweb2_install_packages | bool and ('5.7.' in mysql_cli_version.stdout or '8.0.' in mysql_cli_version.stdout)
+
+# Set root password for MySQL < 5.7.x.
+- name: Update MySQL root password for localhost root account (< 5.7.x).
+  shell: >
+    mysql -NBe
+    'SET PASSWORD FOR "{{ mysql_root_username }}"@"{{ item }}" = PASSWORD("{{ mysql_root_password }}"); FLUSH PRIVILEGES;'
+  with_items: "{{ mysql_root_hosts.stdout_lines|default([]) }}"
+  when: >
+    icingaweb2_install_packages | bool and ('5.7.' not in mysql_cli_version.stdout and '8.0.' not in mysql_cli_version.stdout)
+
+- name: Create .my.cnf
+  template:
+    src: "templates/my.cnf.j2"
+    dest: "{{ mysql_root_home }}/.my.cnf"
+    owner: root
+    group: root
+    mode: 0600
+  when: icingaweb2_install_packages | bool
+
+
+- name: Ensure MySQL databases are present.
+  mysql_db:
+    name: "{{ item.name }}"
+    collation: "{{ item.collation | default('utf8_general_ci') }}"
+    encoding: "{{ item.encoding | default('utf8') }}"
+    state: "{{ item.state | default('present') }}"
+    target: "{{ item.target | default(omit) }}"
+  with_items: "{{ mysql_databases }}"
+  
+- name: Create icinga2db schema
+  mysql_db:
+    name: icinga2db
+    state: import
+    target: "{{ source_icinga2db }}"
+    login_user: "{{ mysql_root_username }}"
+    login_password: "{{ mysql_root_password }}"
+  when: icingaweb2_install_packages | bool
+
+- name: Create director schema
+  mysql_db:
+    name: director
+    state: import
+    target: "{{ source_director }}"
+    login_user: "{{ mysql_root_username }}"
+    login_password: "{{ mysql_root_password }}"
+  when: icingaweb2_install_packages | bool

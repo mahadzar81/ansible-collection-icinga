@@ -1,0 +1,44 @@
+---
+- name: Ensure IcingaWeb2 prerequisite packages are installed.
+  yum:
+    name: "{{ icingaweb2_prerequisite_package_RedHat }}"
+    state: present
+
+- name: Ensure IcingaWeb2 packages are installed.
+  yum:
+    name: "{{ icingaweb2_package_RedHat }}"
+    state: present
+  register: rh_icingaweb2_install_packages
+    
+- name: Copy nagios config to nagiosql directory
+  copy:
+    src: /usr/share/icingaweb2
+    dest: /var/www
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create /etc/apache2/sites-available/icingaweb2.com.conf
+  template:
+    src: "templates/icingaweb2.com.j2"
+    dest: "/etc/apache2/sites-available/icingaweb2.com.conf"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Activates cingaweb2.com virtualhost
+  command: a2ensite icingaweb2.com
+  notify:
+    - restart apache
+
+- name: Start icinga2
+  service: 
+    name: icinga2 
+    state: restarted
+
+- name: Start php-fpm
+  service: 
+    name: php-fpm 
+    enabled: yes
+    state: restarted

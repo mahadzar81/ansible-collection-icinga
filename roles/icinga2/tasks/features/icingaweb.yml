@@ -1,0 +1,12 @@
+---
+
+- name: feature notification IcingaWebComponent object
+  icinga2_object:
+    name: icingaweb
+    type: IcingaWebComponent
+    file: features-available/icingaweb.conf
+    args: "{{ icinga2_dict_features.notification }}"
+  register: result
+
+- set_fact:
+    icinga2_local_objects: "{{ icinga2_local_objects|default([]) + [result.dest] }}"

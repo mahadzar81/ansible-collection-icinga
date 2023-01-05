@@ -1,0 +1,106 @@
+---
+# defaults file for icingaweb2
+icingaweb2_prerequisite_package_debian: 
+  - python3-mysqldb
+  - python-mysqldb
+  - default-libmysqlclient-dev
+  - python-pymysql
+  - software-properties-common
+  - php 
+  - php-curl 
+  - php-gd 
+  - php-mbstring 
+  - php-xml 
+  - php-xmlrpc 
+  - php-soap 
+  - php-intl 
+  - php-zip 
+  - php-cli 
+  - php-mysql 
+  - php-common 
+  - php-opcache 
+  - php-gmp 
+  - php-imagick
+  - monitoring-plugins
+  - mariadb-server 
+  - mariadb-client
+
+icingaweb2_prerequisite_package_RedHat:
+  - python3-mysqldb
+  - python-mysqldb
+  - default-libmysqlclient-dev
+  - python-pymysql
+  - php-cli 
+  - php-pdo 
+  - php-common 
+  - php-mysql 
+  - php-curl 
+  - php-json 
+  - php-zip 
+  - php-gd 
+  - php-xml 
+  - php-mbstring 
+  - php-pecl-mailparse 
+  - php-imap 
+  - php-ldap 
+  - php-imagick
+  - mariadb
+
+icingaweb2_package_RedHat: 
+  - httpd 
+  - icingacli 
+  - icingaweb2 
+  - nagios-plugins-all
+  - icinga-director
+
+icingaweb2_package_debian: 
+  - icingaweb2 
+  - icingacli 
+  - libapache2-mod-php
+  - icinga-director
+
+mysql_config_file: /etc/my.cnf
+mysql_root_home: /root
+mysql_root_username: root
+mysql_root_password: 'password'
+
+source_icinga2db: "/usr/share/icinga2-ido-mysql/schema/mysql.sql"
+source_director: "/usr/share/icingaweb2/modules/director/schema/mysql.sql"
+
+
+
+# Set this to `true` to forcibly update the root password.
+mysql_root_password_update: false
+mysql_user_password_update: false
+
+mysql_databases: 
+  - name: icingaweb2
+    collation: utf8_general_ci
+    encoding: utf8
+
+  - name: icinga2db
+    collation: utf8_general_ci
+    encoding: utf8
+
+  - name: director
+    collation: utf8_general_ci
+    encoding: utf8
+
+mysql_users:
+  - name: icingaweb2user
+    host: "%"
+    password: 'password'
+    priv: "icingaweb2.*:ALL,GRANT"
+
+  - name: icinga2user
+    host: "%"
+    password: 'password'
+    priv: "icinga2db.*:ALL,GRANT"
+
+  - name: director
+    host: "%"
+    password: 'password'
+    priv: "director.*:ALL,GRANT"
+
+domain: icingaweb2.com
+

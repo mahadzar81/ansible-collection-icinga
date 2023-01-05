@@ -1,0 +1,12 @@
+---
+
+- name: feature mainlog FileLogger object
+  icinga2_object:
+    name: main-log
+    type: FileLogger
+    file: features-available/mainlog.conf
+    args: "{{ icinga2_dict_features.mainlog }}"
+  register: result
+
+- set_fact:
+    icinga2_local_objects: "{{ icinga2_local_objects|default([]) + [result.dest] }}"

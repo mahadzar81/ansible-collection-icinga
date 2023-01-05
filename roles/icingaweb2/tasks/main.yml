@@ -1,0 +1,21 @@
+---
+
+# Setup/install tasks.
+- include_tasks: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Check if Icinga2 packages were installed.
+  set_fact:
+    icingaweb2_install_packages: "{{ (rh_icingaweb2_install_packages is defined and rh_icingaweb2_install_packages.changed)
+      or (deb_icingaweb2_install_packages is defined and deb_icingaweb2_install_packages.changed) }}"
+
+- include_tasks: setup-Icingaweb2.yml
+- include_tasks: databases.yml
+- include_tasks: users.yml
+
+
+
+

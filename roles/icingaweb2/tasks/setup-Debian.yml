@@ -1,0 +1,36 @@
+---
+- name: Ensure Dependencies for installation of Icingaweb2 are installed.
+  apt:
+    name: "{{ icingaweb2_prerequisite_package_debian }}"
+    state: present
+  
+
+- name: Install Icingaweb2 package.
+  apt:
+    name: "{{ icingaweb2_package_debian }}"
+    state: present
+  register: deb_icingaweb2_install_packages
+
+- name: Copy icingaweb2 PHP folder to /var/www
+  copy:
+    src: /usr/share/icingaweb2
+    dest: /var/www
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create /etc/apache2/sites-available/icingaweb2.com.conf
+  template:
+    src: "templates/icingaweb2.com.j2"
+    dest: "/etc/apache2/sites-available/{{ domain }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Activates {{ domain }} virtualhost
+  command: a2ensite {{ domain }}
+  notify:
+    - restart apache
+
+
